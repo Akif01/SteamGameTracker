@@ -1,0 +1,16 @@
+﻿@page "/playercount"
+@using System.Text.Json
+@using SteamGameTracker.DataTransferObjects.SteamApi.Models
+@using SteamGameTracker.Models
+@using SteamGameTracker.Services.API
+@inject IAppDetailsService _appDetailsService
+@inject IPlayerNumberService _playerNumberService
+
+<PageTitle>@PageTitleConstants.PlayerCount</PageTitle>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+    }
+}
