@@ -1,5 +1,4 @@
-﻿
-namespace SteamGameTracker.Services.API.URLs
+﻿namespace SteamGameTracker.Services.API.URLs
 {
     public class GetNumberOfCurrentPlayersUrl : FormattableUrlBase
     {
