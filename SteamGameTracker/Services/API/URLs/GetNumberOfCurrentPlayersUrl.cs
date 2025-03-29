@@ -2,18 +2,18 @@
 {
     public class GetNumberOfCurrentPlayersUrl : FormattableUrlBase
     {
-        private readonly string _appId;
+        private readonly int _appId;
 
-        public GetNumberOfCurrentPlayersUrl(string appId)
+        public GetNumberOfCurrentPlayersUrl(int appId)
         {
-            _appId = appId ?? throw new ArgumentNullException(appId);
+            _appId = appId;
         }
 
         public override Dictionary<string, string> ProvidePlaceHolderValueDict()
         {
             return new Dictionary<string, string> 
             {
-                { "appId", _appId }, 
+                { "appId", _appId.ToString() }, 
             };
         }
 

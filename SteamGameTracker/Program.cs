@@ -18,6 +18,8 @@ namespace SteamGameTracker
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
             builder.Services.AddSingleton<IUrlFormatter, UrlFormatter>();
+            builder.Services.AddHttpClient<IAppDetailsService, AppDetailsService>();
+            builder.Services.AddHttpClient<IPlayerNumberService, PlayerNumberService>();
 
             var app = builder.Build();
 

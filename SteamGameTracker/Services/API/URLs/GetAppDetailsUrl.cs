@@ -2,9 +2,9 @@
 {
     public class GetAppDetailsUrl : FormattableUrlBase
     {
-        private readonly string[] _appIds;
+        private readonly int[] _appIds;
 
-        public GetAppDetailsUrl(string[] appIds)
+        public GetAppDetailsUrl(int[] appIds)
         {
             _appIds = appIds ?? throw new ArgumentNullException(nameof(appIds));
         }
