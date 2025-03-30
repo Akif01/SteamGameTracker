@@ -1,0 +1,50 @@
+﻿@page "/featuredapps"
+<PageTitle>@PageTitleConstants.FeaturedApps</PageTitle>
+@attribute [StreamRendering]
+@using SteamGameTracker.Services.API
+@inject IFeaturedAppsService _featuredAppsService
+@inject IAppDetailsService _appDetailsService
+
+
+
+<div class="game-list-container">
+    <ul class="game-list">
+        @{
+            foreach (var viewModel in _appCardViewModels)
+            {
+                <SteamGameTracker.Components.Shared.AppCard ViewModel="viewModel" />
+            }
+        }
+    </ul>
+</div>
+
+
+
+@code {
+    private List<ViewModels.AppCardViewModel> _appCardViewModels = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var featuredAppModels = await _featuredAppsService.GetFeaturedAppsAsync();
+
+        if (featuredAppModels is null)
+            return;
+
+        foreach (var windowsAppModel in featuredAppModels.WindowsFeaturedApps)
+        {
+            var appDetailsModel = await _appDetailsService.GetAppDetailsAsync(windowsAppModel.Id);
+
+            var viewModel = new ViewModels.AppCardViewModel(windowsAppModel.Id,
+            windowsAppModel.Name,
+            windowsAppModel.LargeCapsuleImageURL,
+            windowsAppModel.FinalPriceCents,
+            windowsAppModel.Currency,
+            appDetailsModel?.ShortDescription ?? "", 
+            appDetailsModel?.Genres ?? new());
+
+            _appCardViewModels.Add(viewModel);
+
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}

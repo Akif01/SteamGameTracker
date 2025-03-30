@@ -45,13 +45,13 @@ namespace SteamGameTracker.DataTransferObjects
         public string Website { get; set; }
 
         [JsonPropertyName("pc_requirements")]
-        public SystemRequirementsDTO PcRequirements { get; set; }
+        public SystemRequirementsDTO? PcRequirements { get; set; }
 
-        [JsonPropertyName("mac_requirements")]
-        public SystemRequirementsDTO MacRequirements { get; set; }
+        //[JsonPropertyName("mac_requirements")]
+        //public SystemRequirementsDTO? MacRequirements { get; set; }
 
-        [JsonPropertyName("linux_requirements")]
-        public SystemRequirementsDTO LinuxRequirements { get; set; }
+        //[JsonPropertyName("linux_requirements")]
+        //public SystemRequirementsDTO? LinuxRequirements { get; set; }
 
         [JsonPropertyName("developers")]
         public List<string> Developers { get; set; }

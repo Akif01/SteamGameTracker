@@ -71,3 +71,94 @@ h1:focus {
     background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") no-repeat center/1.75rem transparent;
     transition: all 0.3s ease-in-out;
 }
+
+.game-list-container {
+    width: 100%;
+    background-color: #0e1320;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.game-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.game-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background 0.3s;
+    border: 1px solid white;
+    margin: 5px;
+}
+
+.game-item:hover {
+    background-color: #2a475e;
+}
+
+.game-item img {
+    width: 80px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.game-info {
+    flex-grow: 1;
+}
+
+.game-info h3 {
+    font-size: 14px;
+    margin: 0;
+    color: white;
+}
+
+.game-info p {
+    font-size: 12px;
+    color: #8f98a0;
+    margin: 5px 0;
+}
+
+.discount {
+    background: #a3cf06;
+    color: black;
+    padding: 3px 6px;
+    font-weight: bold;
+    font-size: 12px;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+.price {
+    font-size: 14px;
+    color: white;
+}
+
+.price del {
+    color: #8f98a0;
+    margin-right: 5px;
+}
+
+.main-dark {
+    background-color: #0e1320 !important;
+    color: white !important;
+}
+
+.top-row-dark {
+    background-color: #0e1320 !important;
+    color: white !important;
+    border-bottom: 1px solid white;
+}
+
+.navbar-dark{
+    border-right: 1px solid white;
+}
+
+.nav-scrollable {
+    border-right: 1px solid white;
+    border-top: 1px solid white;
+}

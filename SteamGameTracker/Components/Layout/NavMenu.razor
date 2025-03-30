@@ -1,4 +1,5 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using SteamGameTracker.Components.Pages
+<div class="top-row ps-3 navbar navbar-dark border-bottom-0">
     <div class="container-fluid">
         <a class="navbar-brand" href="">
             Steam Game Tracker
@@ -12,12 +13,17 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                Home
+                @PageTitleConstants.Home
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/playercount" Match="NavLinkMatch.All">
-                Player Count
+                @PageTitleConstants.PlayerCount
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/featuredapps" Match="NavLinkMatch.All">
+                @PageTitleConstants.FeaturedApps
             </NavLink>
         </div>
     </nav>

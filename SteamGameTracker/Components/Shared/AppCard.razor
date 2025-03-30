@@ -1,0 +1,20 @@
+﻿@attribute [StreamRendering]
+@using SteamGameTracker.ViewModels
+@using System.Globalization
+
+<li class="game-item">
+    <img src=@ViewModel.LargeCapsuleImageURL>
+    <div class="game-info">
+        <h3>@ViewModel.Name</h3>
+        <p>@string.Join(", ", ViewModel.Genres)</p>
+        @{
+            var outputCurrencyString = ViewModel.Currency + " " + (ViewModel.PriceInCents / 100.0).ToString("0.00");
+        }
+        <span class="price">@outputCurrencyString</span>
+    </div>
+</li>
+
+@code {
+    [Parameter, EditorRequired]
+    public required AppCardViewModel ViewModel { get; set; }
+}

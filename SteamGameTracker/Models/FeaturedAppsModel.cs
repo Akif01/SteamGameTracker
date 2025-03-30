@@ -4,6 +4,8 @@ namespace SteamGameTracker.Models
 {
     public class FeaturedAppsModel : ModelBase<FeaturedAppsDTO>
     {
+        public List<FeaturedItemModel> WindowsFeaturedApps { get; private set; } = new();
+
         public FeaturedAppsModel(FeaturedAppsDTO dto) : base(dto)
         {
         }
@@ -15,7 +17,12 @@ namespace SteamGameTracker.Models
 
         protected override void PopulateFromDTO(FeaturedAppsDTO dto)
         {
-            
+            foreach (var featueredWindowsItemDTO in dto.FeaturedWindows)
+            {
+                var model = new FeaturedItemModel(featueredWindowsItemDTO);
+
+                WindowsFeaturedApps.Add(model);
+            }
         }
     }
 }

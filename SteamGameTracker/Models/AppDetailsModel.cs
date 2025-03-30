@@ -1,5 +1,4 @@
 ﻿using SteamGameTracker.DataTransferObjects;
-using SteamGameTracker.DataTransferObjects.SteamApi.Models;
 
 namespace SteamGameTracker.Models
 {
@@ -10,6 +9,8 @@ namespace SteamGameTracker.Models
         public bool IsGame { get; private set; }
         public string Name { get; private set; }
         public int RequiredAge { get; private set; }
+        public string ShortDescription { get; private set; }
+        public List<string> Genres { get; private set; }
 
         public AppDetailsModel(SuccessDTO dto) : base(dto)
         {
@@ -22,6 +23,8 @@ namespace SteamGameTracker.Models
             IsGame = dto.Data.Type == "game";
             Name = dto.Data.Name;
             RequiredAge = dto.Data.RequiredAge;
+            ShortDescription = dto.Data.ShortDescription;
+            Genres = dto.Data.Genres.Select(x => x.Description).ToList();
         }
 
         public override bool IsValid()
