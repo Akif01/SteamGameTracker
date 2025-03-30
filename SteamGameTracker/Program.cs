@@ -1,6 +1,7 @@
 using SteamGameTracker.Components;
 using SteamGameTracker.Logging.Providers;
 using SteamGameTracker.Services.API;
+using SteamGameTracker.Utils;
 
 namespace SteamGameTracker
 {
@@ -15,11 +16,14 @@ namespace SteamGameTracker
             builder.Logging.AddProvider(new FileLoggerProvider("logs/log.txt"));
 
             // Add services to the container.
+            builder.Services.AddMemoryCache();
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
             builder.Services.AddSingleton<IUrlFormatter, UrlFormatter>();
+            builder.Services.AddHttpClient<IAppListService, AppListService>();
             builder.Services.AddHttpClient<IAppDetailsService, AppDetailsService>();
             builder.Services.AddHttpClient<IPlayerNumberService, PlayerNumberService>();
+
 
             var app = builder.Build();
 

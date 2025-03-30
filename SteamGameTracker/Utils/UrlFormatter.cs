@@ -1,8 +1,9 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Logging;
+using SteamGameTracker.Services.API;
 using SteamGameTracker.Services.API.URLs;
 
-namespace SteamGameTracker.Services.API
+namespace SteamGameTracker.Utils
 {
     public class UrlFormatter : IUrlFormatter
     {
