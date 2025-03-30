@@ -12,7 +12,7 @@ namespace SteamGameTracker.Services.API
         {
         }
 
-        public async Task<NumberOfCurrentPlayersModel?> GetNumberOfCurrentPlayersModelAsync(int appId, CancellationToken cancellationToken = default)
+        public async Task<NumberOfCurrentPlayersModel?> GetNumberOfCurrentPlayersAsync(int appId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -24,6 +24,13 @@ namespace SteamGameTracker.Services.API
             catch (HttpRequestException ex)
             {
                 Log.LogError(ex, "Error fetching player count for app id {appId}", appId);
+
+                if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    Log.LogError(ex, "App id {appId} was not found", appId);
+                    return null;
+                }
+
                 throw;
             }
             catch (OperationCanceledException ex)

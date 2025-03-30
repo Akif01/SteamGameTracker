@@ -16,5 +16,10 @@ namespace SteamGameTracker.Models
             IsSuccess = dto.Response.Result == 1;
             NumberOfCurrentPlayers = dto.Response.PlayerCount;
         }
+
+        public override bool IsValid()
+        {
+            return true;
+        }
     }
 }

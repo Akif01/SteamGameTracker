@@ -1,0 +1,10 @@
+﻿
+namespace SteamGameTracker.Services.API.URLs
+{
+    public class FeaturedAppsUrl : FormattableUrlBase
+    {
+        public override Dictionary<string, string> ProvidePlaceHolderValueDict() => [];
+
+        public override string ProvideUrlWithPlaceholders() => "https://store.steampowered.com/api/featured/";
+    }
+}

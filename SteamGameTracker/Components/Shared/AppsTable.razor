@@ -1,0 +1,40 @@
+﻿@using SteamGameTracker.Models
+@using SteamGameTracker.Services.API
+@using SteamGameTracker.Utils
+@inject IAppListService appListService
+@inject IPlayerNumberService playerNumberService
+
+@if (_state == ComponentStateEn.Loading)
+{
+    <span>Loading please wait...</span>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public List<AppsModel> Apps { get; set; }
+
+    [Parameter, EditorRequired]
+    public bool ShouldDisplayPlayerCount { get; set; }
+
+    private ComponentStateEn _state = ComponentStateEn.Loading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // try
+        // {
+        //     var appsModel = await appListService.GetApps();
+        //     if (appsModel != null)
+        //     {
+        //         foreach (var app in appsModel.Apps)
+        //         {
+        //             var playerData = await playerNumberService.GetNumberOfCurrentPlayersAsync(app.Id);
+        //             if (playerData is null)
+        //                 continue;
+        //         }
+        //     }
+        // }
+        // catch (Exception ex)
+        // {
+        // }
+    }
+}

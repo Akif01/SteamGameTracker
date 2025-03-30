@@ -63,6 +63,5 @@ namespace SteamGameTracker.Services.API
         {
             return UrlFormatter.GetFormattedUrl(new GetAppDetailsUrl(appIds));
         }
-
     }
 }

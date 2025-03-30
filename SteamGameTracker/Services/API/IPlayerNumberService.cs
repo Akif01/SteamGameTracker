@@ -4,6 +4,6 @@ namespace SteamGameTracker.Services.API
 {
     internal interface IPlayerNumberService
     {
-        Task<NumberOfCurrentPlayersModel?> GetNumberOfCurrentPlayersModelAsync(int appId, CancellationToken cancellationToken = default);
+        Task<NumberOfCurrentPlayersModel?> GetNumberOfCurrentPlayersAsync(int appId, CancellationToken cancellationToken = default);
     }
 }

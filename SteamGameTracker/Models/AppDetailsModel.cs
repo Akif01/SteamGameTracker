@@ -23,5 +23,11 @@ namespace SteamGameTracker.Models
             Name = dto.Data.Name;
             RequiredAge = dto.Data.RequiredAge;
         }
+
+        public override bool IsValid()
+        {
+            return Id > 0 &&
+                !string.IsNullOrEmpty(Name);
+        }
     }
 }
