@@ -2,18 +2,18 @@
 
 namespace SteamGameTracker.Models
 {
-    public class AppModel : ModelBase<AppDTO>
+    public class FeaturedItemModel : ModelBase<FeaturedItemDTO>
     {
         public int Id { get; private set; }
         public string Name { get; private set; }
 
-        public AppModel(AppDTO dto) : base(dto)
+        public FeaturedItemModel(FeaturedItemDTO dto) : base(dto)
         {
         }
 
-        protected override void PopulateFromDTO(AppDTO dto)
+        protected override void PopulateFromDTO(FeaturedItemDTO dto)
         {
-            Id = dto.AppId;
+            Id = dto.Id;
             Name = dto.Name;
         }
 

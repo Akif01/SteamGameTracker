@@ -15,10 +15,9 @@ namespace SteamGameTracker.Models
             foreach (var app in dto.Apps) 
             {
                 var appModel = new AppModel(app);
-
-                if (appModel.IsValid())
-                    Apps.Add(appModel);
             }
         }
+
+        public override bool IsValid() => true;
     }
 }
