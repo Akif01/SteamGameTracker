@@ -35,7 +35,7 @@ namespace SteamGameTracker.Services.API
             }
             catch (OperationCanceledException ex)
             {
-                Log.LogWarning(ex, "GetNumberOfCurrentPlayersModel request for app id '{appId}' was cancelled", appId);
+                Log.LogWarning(ex, "GetNumberOfCurrentPlayers request for app id '{appId}' was cancelled", appId);
                 throw;
             }
         }

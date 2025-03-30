@@ -6,6 +6,9 @@ namespace SteamGameTracker.Models
     {
         public int Id { get; private set; }
         public string Name { get; private set; }
+        public int FinalPriceCents { get; private set; }
+        public string Currency { get; private set; }
+        public string LargeCapsuleImageURL { get; private set; }
 
         public FeaturedItemModel(FeaturedItemDTO dto) : base(dto)
         {
@@ -15,6 +18,9 @@ namespace SteamGameTracker.Models
         {
             Id = dto.Id;
             Name = dto.Name;
+            FinalPriceCents = dto.FinalPrice;
+            Currency = dto.Currency;
+            LargeCapsuleImageURL = dto.LargeCapsuleImage;
         }
 
         public override bool IsValid()

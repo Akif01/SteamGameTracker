@@ -14,9 +14,9 @@
     transition: all 0.3s ease-in-out;
 }
 
-    .navbar-toggler:hover {
-        border-color: rgba(255, 255, 255, 0.6);
-    }
+.navbar-toggler:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+}
 
 /* Navbar Top Row */
 .top-row {
@@ -48,40 +48,40 @@
     padding-bottom: 0.5rem;
 }
 
-    .nav-item:first-of-type {
-        padding-top: 1rem;
-    }
+.nav-item:first-of-type {
+    padding-top: 1rem;
+}
 
-    .nav-item:last-of-type {
-        padding-bottom: 1rem;
-    }
+.nav-item:last-of-type {
+    padding-bottom: 1rem;
+}
 
-    /* Navigation Links */
-    .nav-item ::deep .nav-link {
-        color: #b0b0b0;
-        background: none;
-        border: none;
-        border-radius: 6px;
-        height: 3rem;
-        display: flex;
-        align-items: center;
-        line-height: 3rem;
-        width: 100%;
-        transition: background 0.3s ease, color 0.3s ease;
-    }
+/* Navigation Links */
+.nav-item ::deep .nav-link {
+    color: #b0b0b0;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    line-height: 3rem;
+    width: 100%;
+    transition: background 0.3s ease, color 0.3s ease;
+}
 
-    /* Active Link */
-    .nav-item ::deep a.active {
-        background-color: rgba(255, 255, 255, 0.2);
-        color: white;
-        font-weight: bold;
-    }
+/* Active Link */
+.nav-item ::deep a.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: bold;
+}
 
-    /* Hover Effect */
-    .nav-item ::deep .nav-link:hover {
-        background-color: rgba(255, 255, 255, 0.15);
-        color: white;
-    }
+/* Hover Effect */
+.nav-item ::deep .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+}
 
 /* Navbar Scrollable (Sidebar) */
 .nav-scrollable {

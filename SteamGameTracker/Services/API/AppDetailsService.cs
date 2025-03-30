@@ -17,7 +17,8 @@ namespace SteamGameTracker.Services.API
         {
         }
 
-        public async Task<AppDetailsModel?> GetAppDetailsModelAsync(int appId, CancellationToken cancellationToken = default)
+        public async Task<AppDetailsModel?> GetAppDetailsAsync(int appId, 
+            CancellationToken cancellationToken = default)
         {
             try
             {
@@ -33,12 +34,18 @@ namespace SteamGameTracker.Services.API
             }
             catch (OperationCanceledException ex)
             {
-                Log.LogWarning(ex, "GetAppDetailsModel Request for app id '{appId}' was cancelled", appId);
+                Log.LogWarning(ex, "GetAppDetails request for app id '{appId}' was cancelled", appId);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Log.LogError(ex, "Unexpected error fetching app details for app id {appId}", appId);
                 throw;
             }
         }
 
-        public async Task<IEnumerable<AppDetailsModel>?> GetAppDetailsModelsAsync(int[] appIds, CancellationToken cancellationToken = default) 
+        public async Task<IEnumerable<AppDetailsModel>?> GetAppDetailsAsync(int[] appIds, 
+            CancellationToken cancellationToken = default) 
         {
             try
             {
@@ -54,7 +61,7 @@ namespace SteamGameTracker.Services.API
             }
             catch (OperationCanceledException ex)
             {
-                Log.LogWarning(ex, "GetAppDetailsModel Request for app ids '{appIds}' was cancelled", string.Join(",", appIds));
+                Log.LogWarning(ex, "GetAppDetails request for app ids '{appIds}' was cancelled", string.Join(",", appIds));
                 throw;
             }
         }

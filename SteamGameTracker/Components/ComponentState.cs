@@ -1,4 +1,4 @@
-﻿namespace SteamGameTracker.Utils
+﻿namespace SteamGameTracker.Components
 {
     public enum ComponentStateEn
     {
