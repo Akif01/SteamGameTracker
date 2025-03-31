@@ -1,6 +1,6 @@
 ﻿namespace SteamGameTracker.Components
 {
-    public enum ComponentStateEn
+    public enum ComponentStateEnum
     {
         Loading,
         Finished,

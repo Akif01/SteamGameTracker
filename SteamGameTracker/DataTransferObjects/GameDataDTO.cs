@@ -1,4 +1,5 @@
 ﻿using SteamGameTracker.DataTransferObjects.SteamApi.Models;
+using SteamGameTracker.JsonConverters;
 using System.Text.Json.Serialization;
 
 namespace SteamGameTracker.DataTransferObjects
@@ -45,13 +46,16 @@ namespace SteamGameTracker.DataTransferObjects
         public string Website { get; set; }
 
         [JsonPropertyName("pc_requirements")]
+        [JsonConverter(typeof(SystemRequirementsConverter))]
         public SystemRequirementsDTO? PcRequirements { get; set; }
 
-        //[JsonPropertyName("mac_requirements")]
-        //public SystemRequirementsDTO? MacRequirements { get; set; }
+        [JsonPropertyName("mac_requirements")]
+        [JsonConverter(typeof(SystemRequirementsConverter))]
+        public SystemRequirementsDTO? MacRequirements { get; set; }
 
-        //[JsonPropertyName("linux_requirements")]
-        //public SystemRequirementsDTO? LinuxRequirements { get; set; }
+        [JsonPropertyName("linux_requirements")]
+        [JsonConverter(typeof(SystemRequirementsConverter))]
+        public SystemRequirementsDTO? LinuxRequirements { get; set; }
 
         [JsonPropertyName("developers")]
         public List<string> Developers { get; set; }

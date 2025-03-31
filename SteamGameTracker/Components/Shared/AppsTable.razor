@@ -3,7 +3,7 @@
 @inject IAppListService appListService
 @inject IPlayerNumberService playerNumberService
 
-@if (_state == ComponentStateEn.Loading)
+@if (_state == ComponentStateEnum.Loading)
 {
     <span>Loading please wait...</span>
 }
@@ -15,7 +15,7 @@
     [Parameter, EditorRequired]
     public bool ShouldDisplayPlayerCount { get; set; }
 
-    private ComponentStateEn _state = ComponentStateEn.Loading;
+    private ComponentStateEnum _state = ComponentStateEnum.Loading;
 
     protected override async Task OnInitializedAsync()
     {

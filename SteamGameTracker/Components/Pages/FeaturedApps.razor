@@ -1,48 +1,135 @@
 ﻿@page "/featuredapps"
-<PageTitle>@PageTitleConstants.FeaturedApps</PageTitle>
 @attribute [StreamRendering]
+@using SteamGameTracker.Models
 @using SteamGameTracker.Services.API
-@inject IFeaturedAppsService _featuredAppsService
-@inject IAppDetailsService _appDetailsService
+@using System.Collections.Generic
+@using Microsoft.AspNetCore.Components
+@using ViewModels
+@inject IFeaturedAppsService FeaturedAppsService
+@inject IAppDetailsService AppDetailsService
 
-
+<PageTitle>@PageTitleConstants.FeaturedApps</PageTitle>
 
 <div class="game-list-container">
-    <ul class="game-list">
-        @{
-            foreach (var viewModel in _appCardViewModels)
-            {
-                <SteamGameTracker.Components.Shared.AppCard ViewModel="viewModel" />
-            }
+    @if (_isLoading)
+    {
+        <div role="status" aria-live="polite">
+            <h3>Loading featured apps...</h3>
+            <progress></progress>
+        </div>
+    }
+    else if (_hasError)
+    {
+        <div role="alert">
+            <h3>Error loading featured apps</h3>
+            <p>@ErrorMessage</p>
+            <button @onclick="RetryLoading">Retry</button>
+        </div>
+    }
+    else
+    {
+        if (!AppCardViewModels.Any())
+        {
+            <div>
+                <h3>No featured apps available</h3>
+                <p>Check back later for featured apps.</p>
+            </div>
         }
-    </ul>
+        else
+        {
+            <ul class="game-list">
+                @foreach (var viewModel in AppCardViewModels)
+                {
+                    <SteamGameTracker.Components.Shared.AppCard @key="viewModel.Id" ViewModel="viewModel" />
+                }
+            </ul>
+        }
+    }
 </div>
 
 @code {
-    private List<ViewModels.AppCardViewModel> _appCardViewModels = new();
+    private string? ErrorMessage { get; set; }
+    private List<AppCardViewModel> AppCardViewModels { get; set; } = new();
+    private ComponentStateEnum _state = ComponentStateEnum.Loading;
+    private bool _isLoading => _state == ComponentStateEnum.Loading;
+    private bool _hasError => _state == ComponentStateEnum.Error;
+    private bool _isInitialLoad = true;
 
     protected override async Task OnInitializedAsync()
     {
-        var featuredAppModels = await _featuredAppsService.GetFeaturedAppsAsync();
-
-        if (featuredAppModels is null)
-            return;
-
-        foreach (var windowsAppModel in featuredAppModels.WindowsFeaturedApps)
+        // Only load data if this is the initial load
+        if (_isInitialLoad)
         {
-            var appDetailsModel = await _appDetailsService.GetAppDetailsAsync(windowsAppModel.Id);
-
-            var viewModel = new ViewModels.AppCardViewModel(windowsAppModel.Id,
-            windowsAppModel.Name,
-            windowsAppModel.LargeCapsuleImageURL,
-            windowsAppModel.FinalPriceCents,
-            windowsAppModel.Currency,
-            appDetailsModel?.ShortDescription ?? "", 
-            appDetailsModel?.Genres ?? new());
-
-            _appCardViewModels.Add(viewModel);
-
-            await InvokeAsync(StateHasChanged);
+            _isInitialLoad = false;
+            await LoadData();
         }
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            ErrorMessage = null;
+            AppCardViewModels.Clear();
+
+            var featuredAppModels = await FeaturedAppsService.GetFeaturedAppsAsync();
+            if (featuredAppModels?.WindowsFeaturedApps == null || !featuredAppModels.WindowsFeaturedApps.Any())
+            {
+                SetComponentState(ComponentStateEnum.Finished);
+                return;
+            }
+
+            foreach (var windowsApp in featuredAppModels.WindowsFeaturedApps)
+            {
+                var viewModel = await GetAppCardViewModelAsync(windowsApp);
+
+                if (viewModel is null)
+                    continue;
+
+                AppCardViewModels.Add(viewModel);
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to load featured apps: {ex.Message}";
+            SetComponentState(ComponentStateEnum.Error);
+        }
+        finally
+        {
+            if (_state != ComponentStateEnum.Error)
+            {
+                SetComponentState(ComponentStateEnum.Finished);
+            }
+        }
+    }
+
+    private async Task<AppCardViewModel?> GetAppCardViewModelAsync(FeaturedItemModel itemModel)
+    {
+        if (itemModel is null)
+            return null;
+
+        AppDetailsModel? appDetails = await AppDetailsService?.GetAppDetailsAsync(itemModel.Id);
+
+        if (appDetails is null)
+            return null;
+
+        return new AppCardViewModel(
+            itemModel.Id,
+            itemModel.Name,
+            itemModel.LargeCapsuleImageURL,
+            itemModel.FinalPriceCents,
+            itemModel.Currency,
+            appDetails?.ShortDescription ?? "",
+            appDetails?.Genres ?? new());
+    }
+
+    private async Task RetryLoading()
+    {
+        await LoadData();
+    }
+
+    private void SetComponentState(ComponentStateEnum state)
+    {
+        _state = state;
     }
 }
