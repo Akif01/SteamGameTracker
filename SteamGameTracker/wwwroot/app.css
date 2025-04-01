@@ -96,6 +96,7 @@ h1:focus {
 
 .game-item:hover {
     background-color: #2a475e;
+    cursor: pointer;
 }
 
 .game-item img {
