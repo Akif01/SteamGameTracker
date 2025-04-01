@@ -34,7 +34,7 @@ namespace SteamGameTracker.Utils
             foreach (var kvp in placeholderValueDict)
             {
                 var key = $"{{{kvp.Key}}}";
-                formattedUrlBuilder.Replace(key, kvp.Value);
+                formattedUrlBuilder.Replace(key, kvp.Value.ToString());
             }
 
             string formattedUrl = formattedUrlBuilder.ToString();

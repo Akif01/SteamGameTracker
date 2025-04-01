@@ -1,8 +1,12 @@
 ﻿@attribute [StreamRendering]
+@using SteamGameTracker.Services.API
+@using SteamGameTracker.Services.API.URLs
 @using SteamGameTracker.ViewModels
 @using System.Globalization
+@inject IJSRuntime JSRuntime
+@inject IUrlFormatter UrlFormatter;
 
-<li class="game-item">
+<li class="game-item" onclick="window.open('@_gameSteamPageUrl')">
     <img src=@ViewModel.LargeCapsuleImageURL>
     <div class="game-info">
         <h3>@ViewModel.Name</h3>
@@ -17,4 +21,13 @@
 @code {
     [Parameter, EditorRequired]
     public required AppCardViewModel ViewModel { get; set; }
+    private string _gameSteamPageUrl = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        var url = new SteamGamePageUrl(ViewModel.Id);
+        _gameSteamPageUrl = UrlFormatter.GetFormattedUrl(url);
+
+        base.OnInitialized();
+    }
 }

@@ -11,9 +11,9 @@
 
         public override string ProvideUrlWithPlaceholders() => "https://store.steampowered.com/api/appdetails?appids={appIds}";
 
-        public override Dictionary<string, string> ProvidePlaceHolderValueDict()
+        public override Dictionary<string, IConvertible> ProvidePlaceHolderValueDict()
         {
-            return new Dictionary<string, string> 
+            return new Dictionary<string, IConvertible> 
             { 
                 { "appIds", string.Join(",", _appIds) }, 
             };

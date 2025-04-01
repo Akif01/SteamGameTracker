@@ -3,6 +3,6 @@
     public abstract class FormattableUrlBase
     {
         public abstract string ProvideUrlWithPlaceholders();
-        public abstract Dictionary<string, string> ProvidePlaceHolderValueDict();
+        public abstract Dictionary<string, IConvertible> ProvidePlaceHolderValueDict();
     }
 }

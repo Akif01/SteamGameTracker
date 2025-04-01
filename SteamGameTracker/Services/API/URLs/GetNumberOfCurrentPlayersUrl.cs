@@ -9,11 +9,11 @@
             _appId = appId;
         }
 
-        public override Dictionary<string, string> ProvidePlaceHolderValueDict()
+        public override Dictionary<string, IConvertible> ProvidePlaceHolderValueDict()
         {
-            return new Dictionary<string, string> 
+            return new Dictionary<string, IConvertible> 
             {
-                { "appId", _appId.ToString() }, 
+                { "appId", _appId }, 
             };
         }
 
