@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using SteamGameTracker.Components;
 using SteamGameTracker.DataTransferObjects.SteamApi.Models;
 using SteamGameTracker.Models;
@@ -12,24 +13,49 @@ namespace SteamGameTracker.Services.API
 {
     public class AppDetailsService : ApiServiceBase, IAppDetailsService
     {
-        public AppDetailsService(IUrlFormatter urlFormatter, HttpClient httpClient, ILogger<AppDetailsService> logger) 
+        private IMemoryCache _memoryCache;
+
+        public AppDetailsService(IUrlFormatter urlFormatter, 
+            HttpClient httpClient, 
+            ILogger<AppDetailsService> logger, 
+            IMemoryCache memoryCache) 
             : base(httpClient, logger, urlFormatter)
         {
+            _memoryCache = memoryCache;
         }
 
         public async Task<AppDetailsModel?> GetAppDetailsAsync(int appId, 
             CancellationToken cancellationToken = default)
         {
+            string cacheKey = "AppDetails";
+
+            // Try to get the value from cache
+            if (_memoryCache.TryGetValue(cacheKey, out AppDetailsModel? cachedResult))
+            {
+                Log.LogInformation("Returning app details for app '{appId}' from cache", appId);
+                return cachedResult;
+            }
+
             try
             {
                 var url = GetFormattedAppDetailsUrl(appId);
                 var appDetailsDTO = await GetDtoAsync<AppDetailsDTO>(url, cancellationToken);
+                var result = appDetailsDTO is not null ? new AppDetailsModel(appDetailsDTO[appId]) : null;
 
-                return appDetailsDTO is not null ? new AppDetailsModel(appDetailsDTO[appId]) : null;
+                if (result is not null)
+                {
+                    var cacheOptions = new MemoryCacheEntryOptions()
+                        .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+
+                    _memoryCache.Set(cacheKey, result, cacheOptions);
+                    Log.LogInformation("Stored app details for app '{appId}' in cache", appId);
+                }
+
+                return result;
             }
             catch (HttpRequestException ex)
             {
-                Log.LogError(ex, "Error fetching app details for app id {appId}", appId);
+                Log.LogError(ex, "Error fetching app details for app id '{appId}'", appId);
                 throw;
             }
             catch (OperationCanceledException ex)
@@ -39,7 +65,7 @@ namespace SteamGameTracker.Services.API
             }
             catch (Exception ex)
             {
-                Log.LogError(ex, "Unexpected error fetching app details for app id {appId}", appId);
+                Log.LogError(ex, "Unexpected error fetching app details for app id '{appId}'", appId);
                 throw;
             }
         }
@@ -62,6 +88,11 @@ namespace SteamGameTracker.Services.API
             catch (OperationCanceledException ex)
             {
                 Log.LogWarning(ex, "GetAppDetails request for app ids '{appIds}' was cancelled", string.Join(",", appIds));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Log.LogError(ex, "Unexpected error fetching app details for app id '{appIds}'", string.Join(",", appIds));
                 throw;
             }
         }
