@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio files
+.vs/
+*.user
+*.userosscache
+*.suo
+*.dbmdl
+*.jfm
+*.pfx
+*.publishsettings
+
+# Node modules
+node_modules/
+
+# Local development settings
+appsettings.Development.json
+
+# Misc
+README.md
+LICENSE
+*.md
