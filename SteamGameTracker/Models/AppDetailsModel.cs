@@ -11,6 +11,7 @@ namespace SteamGameTracker.Models
         public int RequiredAge { get; private set; }
         public string ShortDescription { get; private set; }
         public List<string> Genres { get; private set; }
+        public string Type { get; private set; }
 
         public AppDetailsModel(SuccessDTO dto) : base(dto)
         {
@@ -25,6 +26,7 @@ namespace SteamGameTracker.Models
             RequiredAge = dto.Data.RequiredAge;
             ShortDescription = dto.Data.ShortDescription;
             Genres = dto.Data.Genres.Select(x => x.Description).ToList();
+            Type = dto.Data.Type;
         }
 
         public override bool IsValid()
