@@ -16,7 +16,16 @@ namespace SteamGameTracker
             builder.Logging.AddProvider(new FileLoggerProvider("logs/log.txt"));
 
             // Add services to the container.
-            builder.Services.AddMemoryCache();
+            //builder.Services.AddStackExchangeRedisCache(options =>
+            //{
+            //    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+            //    options.InstanceName = "SteamGameTracker_";
+            //});
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = "redis:6379";
+                options.InstanceName = "SteamGameTracker_";
+            });
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
             builder.Services.AddSingleton<IUrlFormatter, UrlFormatter>();
