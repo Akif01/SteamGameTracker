@@ -8,7 +8,7 @@ namespace SteamGameTracker.Services.API
 {
     public class FeaturedAppsService : ApiServiceBase, IFeaturedAppsService
     {
-        private IMemoryCache _memoryCache;
+        private readonly IMemoryCache _memoryCache;
 
         public FeaturedAppsService(HttpClient httpClient, 
             ILogger<FeaturedAppsService> logger, 

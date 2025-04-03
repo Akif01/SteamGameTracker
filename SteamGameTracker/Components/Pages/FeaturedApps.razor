@@ -5,8 +5,10 @@
 @using System.Collections.Generic
 @using Microsoft.AspNetCore.Components
 @using ViewModels
+@using System.Linq;
 @inject IFeaturedAppsService FeaturedAppsService
 @inject IAppDetailsService AppDetailsService
+@inject IPlayerNumberService PlayerNumberService;
 
 <PageTitle>@PageTitleConstants.FeaturedApps</PageTitle>
 
@@ -87,6 +89,8 @@
 
                 AppCardViewModels.Add(viewModel);
             }
+
+            AppCardViewModels = AppCardViewModels.OrderByDescending(x => x.NumberOfCurrentPlayers).ToList();
         }
         catch (Exception ex)
         {
@@ -112,6 +116,8 @@
         if (appDetails is null)
             return null;
 
+        var playerNumberModel = await PlayerNumberService.GetNumberOfCurrentPlayersAsync(appDetails.Id);
+
         return new AppCardViewModel(
             itemModel.Id,
             itemModel.Name,
@@ -119,7 +125,8 @@
             itemModel.FinalPriceCents,
             itemModel.Currency,
             appDetails?.ShortDescription ?? "",
-            appDetails?.Genres ?? new());
+            appDetails?.Genres ?? new(), 
+            playerNumberModel?.NumberOfCurrentPlayers ?? 0);
     }
 
     private void SetComponentState(ComponentStateEnum state)

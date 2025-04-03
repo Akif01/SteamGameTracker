@@ -1,19 +1,13 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
-using SteamGameTracker.Components;
 using SteamGameTracker.DataTransferObjects.SteamApi.Models;
 using SteamGameTracker.Models;
 using SteamGameTracker.Services.API.URLs;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Text.Json;
-using System.Threading;
 
 namespace SteamGameTracker.Services.API
 {
     public class AppDetailsService : ApiServiceBase, IAppDetailsService
     {
-        private IMemoryCache _memoryCache;
+        private readonly IMemoryCache _memoryCache;
 
         public AppDetailsService(IUrlFormatter urlFormatter, 
             HttpClient httpClient, 
@@ -27,7 +21,7 @@ namespace SteamGameTracker.Services.API
         public async Task<AppDetailsModel?> GetAppDetailsAsync(int appId, 
             CancellationToken cancellationToken = default)
         {
-            string cacheKey = "AppDetails";
+            string cacheKey = $"AppDetails_{appId}";
 
             // Try to get the value from cache
             if (_memoryCache.TryGetValue(cacheKey, out AppDetailsModel? cachedResult))

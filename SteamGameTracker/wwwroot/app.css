@@ -109,6 +109,8 @@ h1:focus {
 }
 
 .game-info {
+    display: flex;
+    flex-direction: column;
     flex-grow: 1;
 }
 
@@ -142,6 +144,15 @@ h1:focus {
 .price del {
     color: #8f98a0;
     margin-right: 5px;
+}
+
+.game-addional-info{
+    display: flex;
+    flex-direction: column;
+}
+
+.game-player-count {
+    font-weight: bold;
 }
 
 .main-dark {
