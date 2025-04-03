@@ -124,9 +124,11 @@
             itemModel.LargeCapsuleImageURL,
             itemModel.FinalPriceCents,
             itemModel.Currency,
-            appDetails?.ShortDescription ?? "",
-            appDetails?.Genres ?? new(), 
-            playerNumberModel?.NumberOfCurrentPlayers ?? 0);
+            appDetails.ShortDescription ?? "",
+            appDetails.Genres ?? new(), 
+            playerNumberModel?.NumberOfCurrentPlayers ?? 0, 
+            appDetails.RequiredAge, 
+            appDetails.Type ?? "");
     }
 
     private void SetComponentState(ComponentStateEnum state)

@@ -7,5 +7,7 @@
         string Currency, 
         string ShortDescription, 
         List<string> Genres, 
-        int NumberOfCurrentPlayers);
+        int NumberOfCurrentPlayers,
+        int RequiredAge,
+        string AppType);
 }

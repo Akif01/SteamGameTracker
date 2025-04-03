@@ -149,9 +149,10 @@ h1:focus {
 .game-addional-info{
     display: flex;
     flex-direction: column;
+    font-size: 14px;
 }
 
-.game-player-count {
+.game-player-count, .game-age-required, .game-type {
     font-weight: bold;
 }
 
