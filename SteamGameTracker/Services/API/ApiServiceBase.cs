@@ -14,7 +14,7 @@ namespace SteamGameTracker.Services.API
         {
             Client = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             Log = logger ?? throw new ArgumentNullException(nameof(logger));
-            UrlFormatter = urlFormatter ?? throw new ArgumentNullException(nameof(UrlFormatter));
+            UrlFormatter = urlFormatter ?? throw new ArgumentNullException(nameof(urlFormatter));
         }
 
         public async Task<TDto?> GetDtoAsync<TDto>(
@@ -24,7 +24,7 @@ namespace SteamGameTracker.Services.API
         {
             try
             {
-                Log.LogInformation("Sending GET request to {Url}", url);
+                Log.LogInformation("Sending GET request to URL '{Url}'", url);
 
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
 
@@ -42,19 +42,22 @@ namespace SteamGameTracker.Services.API
             }
             catch (HttpRequestException ex)
             {
-                Log.LogError(ex, "HTTP request failed for URL: {Url}", url);
-                throw;
+                Log.LogError(ex, "HTTP request failed for URL'{Url}' with Http status code '{httpStatusCode}'", url, ex.StatusCode);
             }
             catch (JsonException ex)
             {
-                Log.LogError(ex, "JSON deserialization error for URL: {Url}", url);
-                throw;
+                Log.LogError(ex, "JSON deserialization error for URL '{Url}' and DTO '{TDto}'", url, typeof(TDto));
             }
             catch (OperationCanceledException ex)
             {
-                Log.LogWarning(ex, "Request to {Url} was cancelled or timed out", url);
-                throw;
+                Log.LogWarning(ex, "Request to URL '{Url}' was cancelled or timed out", url);
             }
+            catch (Exception ex)
+            {
+                Log.LogError(ex, "Fatal error trying to get from URL '{Url}' and DTO '{TDto}'", url, typeof(TDto));
+            }
+
+            return null;
         }
     }
 }

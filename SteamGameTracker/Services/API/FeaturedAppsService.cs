@@ -32,38 +32,28 @@ namespace SteamGameTracker.Services.API
                 }
                 catch (Exception ex)
                 {
-                    Log.LogError(ex, "Error building featured apps model, removing corrupted entry");
+                    Log.LogError(ex, "Error building featured apps model from cache, removing corrupted entry");
                     await _cacheService.RemoveAsync(cacheKey, cancellationToken);
                 }
             }
 
+            var url = GetFormattedFeaturedAppsUrl();
+            var featuredAppsDTO = await GetDtoAsync<FeaturedAppsDTO>(url, cancellationToken);
+
+            if (featuredAppsDTO is null)
+                return null;
+
             try
             {
-                var url = GetFormattedFeaturedAppsUrl();
-                var featuredAppsDTO = await GetDtoAsync<FeaturedAppsDTO>(url, cancellationToken);
-                var result = featuredAppsDTO is not null ? new FeaturedAppsModel(featuredAppsDTO) : null;
-
-                if (result is not null)
-                {
-                    await _cacheService.SetDtoAsync<FeaturedAppsDTO>(cacheKey, featuredAppsDTO, cancellationToken);
-                }
+                var result = new FeaturedAppsModel(featuredAppsDTO);
+                await _cacheService.SetDtoAsync<FeaturedAppsDTO>(cacheKey, featuredAppsDTO, cancellationToken);
 
                 return result;
             }
-            catch (HttpRequestException ex)
-            {
-                Log.LogError(ex, "Http error fetching featured apps");
-                throw;
-            }
-            catch (OperationCanceledException ex)
-            {
-                Log.LogWarning(ex, "GetFeaturedAppsAsync request was cancelled");
-                throw;
-            }
             catch (Exception ex)
             {
-                Log.LogError(ex, "Unexpected error fetching featured apps");
-                throw;
+                Log.LogError(ex, "Error building featured apps model from API response");
+                return null;
             }
         }
 
