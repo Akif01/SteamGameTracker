@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-using System.Text.Json;
-using SteamGameTracker.DataTransferObjects.SteamApi.Models;
+﻿using SteamGameTracker.DataTransferObjects.SteamApi.Models;
 using SteamGameTracker.Models;
 using SteamGameTracker.Services.API.URLs;
 using SteamGameTracker.DataTransferObjects;
@@ -9,15 +7,15 @@ namespace SteamGameTracker.Services.API
 {
     public class AppDetailsService : ApiServiceBase, IAppDetailsService
     {
-        private readonly IDistributedCache _distributedCache;
+        private readonly ICacheService _cacheService;
 
         public AppDetailsService(IUrlFormatter urlFormatter,
             HttpClient httpClient,
             ILogger<AppDetailsService> logger,
-            IDistributedCache distributedCache)
+            ICacheService cacheService)
             : base(httpClient, logger, urlFormatter)
         {
-            _distributedCache = distributedCache;
+            _cacheService = cacheService;
         }
 
         public async Task<AppDetailsModel?> GetAppDetailsAsync(int appId,
@@ -25,54 +23,37 @@ namespace SteamGameTracker.Services.API
         {
             string cacheKey = $"AppDetails_{appId}";
 
+            var cachedDto = await _cacheService.GetDtoAsync<SuccessDTO>(cacheKey, cancellationToken);
+
+            if (cachedDto is not null)
+            {
+                try
+                {
+                    return new AppDetailsModel(cachedDto);
+                }
+                catch (Exception ex)
+                {
+                    Log.LogError(ex, "Error building app details model for apppId '{appId}', removing corrupted entry", appId);
+                    await _cacheService.RemoveAsync(cacheKey, cancellationToken);
+                }
+            }
+
             try
             {
-                // Try to get the value from Redis cache
-                string? cachedData = await _distributedCache.GetStringAsync(cacheKey, cancellationToken);
-
-                if (!string.IsNullOrEmpty(cachedData))
-                {
-                    Log.LogInformation("Returning app details for app '{appId}' from Redis cache", appId);
-
-                    try
-                    {
-                        var cachedDto = JsonSerializer.Deserialize<SuccessDTO>(cachedData);
-                        if (cachedDto != null)
-                        {
-                            return new AppDetailsModel(cachedDto);
-                        }
-                    }
-                    catch (JsonException ex)
-                    {
-                        Log.LogError(ex, "Error deserializing cached data for app '{appId}'", appId);
-                        // Remove corrupted cache entry
-                        await _distributedCache.RemoveAsync(cacheKey, cancellationToken);
-                    }
-                }
-
                 var url = GetFormattedAppDetailsUrl(appId);
                 var appDetailsDTO = await GetDtoAsync<AppDetailsDTO>(url, cancellationToken);
                 var result = appDetailsDTO is not null ? new AppDetailsModel(appDetailsDTO[appId]) : null;
 
                 if (result is not null)
                 {
-                    // Set the cache options
-                    var cacheOptions = new DistributedCacheEntryOptions()
-                        .SetAbsoluteExpiration(TimeSpan.FromHours(1));
-
-                    // Store the DTO in cache, not the model
-                    var dtoToCache = appDetailsDTO[appId];
-                    string serializedData = JsonSerializer.Serialize(dtoToCache);
-                    await _distributedCache.SetStringAsync(cacheKey, serializedData, cacheOptions, cancellationToken);
-
-                    Log.LogInformation("Stored app details for app '{appId}' in Redis cache", appId);
+                    await _cacheService.SetDtoAsync<SuccessDTO>(cacheKey, appDetailsDTO[appId], cancellationToken);
                 }
 
                 return result;
             }
             catch (HttpRequestException ex)
             {
-                Log.LogError(ex, "Error fetching app details for app id '{appId}'", appId);
+                Log.LogError(ex, "Http error fetching app details for app id '{appId}'", appId);
                 throw;
             }
             catch (OperationCanceledException ex)
@@ -98,24 +79,20 @@ namespace SteamGameTracker.Services.API
             foreach (var appId in appIds)
             {
                 string cacheKey = $"AppDetails_{appId}";
-                string? cachedData = await _distributedCache.GetStringAsync(cacheKey, cancellationToken);
+                var cachedDto = await _cacheService.GetDtoAsync<SuccessDTO>(cacheKey, cancellationToken);
 
-                if (!string.IsNullOrEmpty(cachedData))
+                if (cachedDto is not null)
                 {
                     try
                     {
-                        var cachedDto = JsonSerializer.Deserialize<SuccessDTO>(cachedData);
-                        if (cachedDto != null)
-                        {
-                            var model = new AppDetailsModel(cachedDto);
-                            results.Add(model);
-                            continue;
-                        }
+                        var model = new AppDetailsModel(cachedDto);
+                        results.Add(model);
+                        continue;
                     }
-                    catch (JsonException ex)
+                    catch (Exception ex)
                     {
-                        Log.LogError(ex, "Error deserializing cached data for app '{appId}'", appId);
-                        await _distributedCache.RemoveAsync(cacheKey, cancellationToken);
+                        Log.LogError(ex, "Error building app details model for apppId '{appId}', removing corrupted entry", appId);
+                        await _cacheService.RemoveAsync(cacheKey, cancellationToken);
                     }
                 }
 
@@ -143,15 +120,8 @@ namespace SteamGameTracker.Services.API
                         var model = new AppDetailsModel(dto);
                         results.Add(model);
 
-                        // Cache the DTO, not the model
                         string cacheKey = $"AppDetails_{appId}";
-                        var cacheOptions = new DistributedCacheEntryOptions()
-                            .SetAbsoluteExpiration(TimeSpan.FromHours(1));
-
-                        string serializedData = JsonSerializer.Serialize(dto);
-                        await _distributedCache.SetStringAsync(cacheKey, serializedData, cacheOptions, cancellationToken);
-
-                        Log.LogInformation("Stored app details for app '{appId}' in Redis cache", appId);
+                        await _cacheService.SetDtoAsync(cacheKey, dto, cancellationToken);
                     }
                 }
 
@@ -177,22 +147,6 @@ namespace SteamGameTracker.Services.API
         private string GetFormattedAppDetailsUrl(params int[] appIds)
         {
             return UrlFormatter.GetFormattedUrl(new GetAppDetailsUrl(appIds));
-        }
-
-        // Add this method for other services using ModelBase<T> pattern
-        public static T DeserializeModelBase<T, TDto>(string json, JsonSerializerOptions options = null)
-            where T : ModelBase<TDto>, new()
-            where TDto : class
-        {
-            var dto = JsonSerializer.Deserialize<TDto>(json, options);
-            var constructor = typeof(T).GetConstructor(new[] { typeof(TDto) });
-
-            if (constructor != null && dto != null)
-            {
-                return (T)constructor.Invoke(new object[] { dto });
-            }
-
-            return null;
         }
     }
 }

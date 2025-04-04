@@ -1,50 +1,38 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
-using SteamGameTracker.DataTransferObjects;
+﻿using SteamGameTracker.DataTransferObjects;
 using SteamGameTracker.Models;
 using SteamGameTracker.Services.API.URLs;
-using System.Text.Json;
 
 namespace SteamGameTracker.Services.API
 {
     public class PlayerNumberService : ApiServiceBase, IPlayerNumberService
     {
-        private readonly IDistributedCache _distributedCache;
+        private readonly ICacheService _cacheService;
 
         public PlayerNumberService(HttpClient httpClient, 
             ILogger<PlayerNumberService> logger, 
             IUrlFormatter urlFormatter,
-            IDistributedCache distributedCache) 
+            ICacheService cacheService) 
             : base(httpClient, logger, urlFormatter)
         {
-            _distributedCache = distributedCache;
+            _cacheService = cacheService;
         }
 
         public async Task<NumberOfCurrentPlayersModel?> GetNumberOfCurrentPlayersAsync(int appId, 
             CancellationToken cancellationToken = default)
         {
             string cacheKey = $"NumberOfCurrentPlayers_{appId}";
+            var cachedDto = await _cacheService.GetDtoAsync<NumberOfCurrentPlayersDTO>(cacheKey, cancellationToken);
 
-            // Try to get the value from Redis cache
-            string? cachedData = await _distributedCache.GetStringAsync(cacheKey, cancellationToken);
-
-            if (!string.IsNullOrEmpty(cachedData))
+            if (cachedDto is not null)
             {
                 try
                 {
-                    var cachedDto = JsonSerializer.Deserialize<NumberOfCurrentPlayersDTO>(cachedData);
-                    Log.LogInformation("Returning number of current players for app id '{appId}' from Redis cache", appId);
-
-                    if (cachedDto != null)
-                    {
-                        return new NumberOfCurrentPlayersModel(cachedDto);
-                    }
+                    return new NumberOfCurrentPlayersModel(cachedDto);
                 }
-                catch (JsonException ex)
+                catch (Exception ex)
                 {
-                    Log.LogError(ex, "Error deserializing number of current players for appId '{appId}'", appId);
-                    // Remove corrupted cache entry
-                    await _distributedCache.RemoveAsync(cacheKey, cancellationToken);
+                    Log.LogError(ex, "Error building model for app id '{appId}' from cache, removing corrupted entry", appId);
+                    await _cacheService.RemoveAsync(cacheKey, cancellationToken);
                 }
             }
 
@@ -56,22 +44,14 @@ namespace SteamGameTracker.Services.API
 
                 if (result is not null)
                 {
-                    // Set the cache options
-                    var cacheOptions = new DistributedCacheEntryOptions()
-                        .SetAbsoluteExpiration(TimeSpan.FromHours(1));
-
-                    // Serialize and store in Redis
-                    string serializedData = JsonSerializer.Serialize(dto);
-                    await _distributedCache.SetStringAsync(cacheKey, serializedData, cacheOptions, cancellationToken);
-
-                    Log.LogInformation("Stored number of current players for app '{appId}' in Redis cache", appId);
+                    await _cacheService.SetDtoAsync<NumberOfCurrentPlayersDTO>(cacheKey, dto, cancellationToken);
                 }
 
                 return result;
             }
             catch (HttpRequestException ex)
             {
-                Log.LogError(ex, "Error fetching player count for app id {appId}", appId);
+                Log.LogError(ex, "Http error fetching player count for app id '{appId}'", appId);
 
                 if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
