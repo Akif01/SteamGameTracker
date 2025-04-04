@@ -1,5 +1,6 @@
 using SteamGameTracker.Components;
 using SteamGameTracker.Logging.Providers;
+using SteamGameTracker.Services;
 using SteamGameTracker.Services.API;
 using SteamGameTracker.Utils;
 
@@ -33,7 +34,7 @@ namespace SteamGameTracker
             builder.Services.AddHttpClient<IFeaturedAppsService, FeaturedAppsService>();
             builder.Services.AddHttpClient<IAppDetailsService, AppDetailsService>();
             builder.Services.AddHttpClient<IPlayerNumberService, PlayerNumberService>();
-
+            builder.Services.AddTransient<ICacheService, CacheService>();
 
             var app = builder.Build();
 

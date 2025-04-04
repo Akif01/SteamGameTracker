@@ -1,51 +1,39 @@
-﻿
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
-using SteamGameTracker.Components;
+﻿using SteamGameTracker.Components;
 using SteamGameTracker.DataTransferObjects;
 using SteamGameTracker.Models;
 using SteamGameTracker.Services.API.URLs;
-using System.Text.Json;
 
 namespace SteamGameTracker.Services.API
 {
     public class FeaturedAppsService : ApiServiceBase, IFeaturedAppsService
     {
-        private readonly IDistributedCache _distributedCache;
+        private readonly ICacheService _cacheService;
 
         public FeaturedAppsService(HttpClient httpClient, 
             ILogger<FeaturedAppsService> logger, 
-            IUrlFormatter urlFormatter, 
-            IDistributedCache distributedCache) 
+            IUrlFormatter urlFormatter,
+            ICacheService cacheService) 
             : base(httpClient, logger, urlFormatter)
         {
-            _distributedCache = distributedCache;
+            _cacheService = cacheService;
         }
 
         public async Task<FeaturedAppsModel?> GetFeaturedAppsAsync(CancellationToken cancellationToken = default)
         {
             string cacheKey = "FeaturedApps";
 
-            // Try to get the value from Redis cache
-            string? cachedData = await _distributedCache.GetStringAsync(cacheKey, cancellationToken);
+            var cachedDto = await _cacheService.GetDtoAsync<FeaturedAppsDTO>(cacheKey, cancellationToken);
 
-            if (!string.IsNullOrEmpty(cachedData))
+            if (cachedDto is not null)
             {
                 try
                 {
-                    var cachedDto = JsonSerializer.Deserialize<FeaturedAppsDTO>(cachedData);
-                    Log.LogInformation("Returning featured apps from Redis cache");
-
-                    if (cachedDto != null)
-                    {
-                        return new FeaturedAppsModel(cachedDto);
-                    }
+                    return new FeaturedAppsModel(cachedDto);
                 }
-                catch (JsonException ex)
+                catch (Exception ex)
                 {
-                    Log.LogError(ex, "Error deserializing cached data for featureed apps");
-                    // Remove corrupted cache entry
-                    await _distributedCache.RemoveAsync(cacheKey, cancellationToken);
+                    Log.LogError(ex, "Error building featured apps model, removing corrupted entry");
+                    await _cacheService.RemoveAsync(cacheKey, cancellationToken);
                 }
             }
 
@@ -57,27 +45,24 @@ namespace SteamGameTracker.Services.API
 
                 if (result is not null)
                 {
-                    // Set the cache options
-                    var cacheOptions = new DistributedCacheEntryOptions()
-                        .SetAbsoluteExpiration(TimeSpan.FromHours(1));
-
-                    // Serialize and store in Redis
-                    string serializedData = JsonSerializer.Serialize(featuredAppsDTO);
-                    await _distributedCache.SetStringAsync(cacheKey, serializedData, cacheOptions, cancellationToken);
-
-                    Log.LogInformation("Stored featured apps in Redis cache");
+                    await _cacheService.SetDtoAsync<FeaturedAppsDTO>(cacheKey, featuredAppsDTO, cancellationToken);
                 }
 
                 return result;
             }
             catch (HttpRequestException ex)
             {
-                Log.LogError(ex, "Error fetching featured apps");
+                Log.LogError(ex, "Http error fetching featured apps");
                 throw;
             }
             catch (OperationCanceledException ex)
             {
                 Log.LogWarning(ex, "GetFeaturedAppsAsync request was cancelled");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Log.LogError(ex, "Unexpected error fetching featured apps");
                 throw;
             }
         }
