@@ -38,33 +38,23 @@ namespace SteamGameTracker.Services.API
                 }
             }
 
+            var url = GetFormattedAppDetailsUrl(appId);
+            var appDetailsDTO = await GetDtoAsync<AppDetailsDTO>(url, cancellationToken);
+
+            if (appDetailsDTO is null)
+                return null;
+
             try
             {
-                var url = GetFormattedAppDetailsUrl(appId);
-                var appDetailsDTO = await GetDtoAsync<AppDetailsDTO>(url, cancellationToken);
-                var result = appDetailsDTO is not null ? new AppDetailsModel(appDetailsDTO[appId]) : null;
-
-                if (result is not null)
-                {
-                    await _cacheService.SetDtoAsync<SuccessDTO>(cacheKey, appDetailsDTO[appId], cancellationToken);
-                }
+                var result = new AppDetailsModel(appDetailsDTO[appId]);
+                await _cacheService.SetDtoAsync<SuccessDTO>(cacheKey, appDetailsDTO[appId], cancellationToken);
 
                 return result;
             }
-            catch (HttpRequestException ex)
-            {
-                Log.LogError(ex, "Http error fetching app details for app id '{appId}'", appId);
-                throw;
-            }
-            catch (OperationCanceledException ex)
-            {
-                Log.LogWarning(ex, "GetAppDetails request for app id '{appId}' was cancelled", appId);
-                throw;
-            }
             catch (Exception ex)
             {
-                Log.LogError(ex, "Unexpected error fetching app details for app id '{appId}'", appId);
-                throw;
+                Log.LogError(ex, "Error building app details model from API response for app id '{appId}'", appId);
+                return null;
             }
         }
 
@@ -78,7 +68,7 @@ namespace SteamGameTracker.Services.API
             // Check cache for each app id
             foreach (var appId in appIds)
             {
-                string cacheKey = $"AppDetails_{appId}";
+                string cacheKey = GetCacheKey(appId);
                 var cachedDto = await _cacheService.GetDtoAsync<SuccessDTO>(cacheKey, cancellationToken);
 
                 if (cachedDto is not null)
@@ -105,48 +95,31 @@ namespace SteamGameTracker.Services.API
                 return results;
             }
 
-            // Fetch missing items
-            try
-            {
-                var url = GetFormattedAppDetailsUrl(missingAppIds.ToArray());
-                var appDetailsDTO = await GetDtoAsync<AppDetailsDTO>(url, cancellationToken);
+            var url = GetFormattedAppDetailsUrl(missingAppIds.ToArray());
+            var appDetailsDTO = await GetDtoAsync<AppDetailsDTO>(url, cancellationToken);
 
-                if (appDetailsDTO is not null)
+            if (appDetailsDTO is not null)
+            {
+                foreach (var detail in appDetailsDTO)
                 {
-                    foreach (var detail in appDetailsDTO)
-                    {
-                        var appId = detail.Key;
-                        var dto = detail.Value;
-                        var model = new AppDetailsModel(dto);
-                        results.Add(model);
+                    var appId = detail.Key;
+                    var dto = detail.Value;
+                    var model = new AppDetailsModel(dto);
+                    results.Add(model);
 
-                        string cacheKey = $"AppDetails_{appId}";
-                        await _cacheService.SetDtoAsync(cacheKey, dto, cancellationToken);
-                    }
+                    string cacheKey = GetCacheKey(appId);
+                    await _cacheService.SetDtoAsync(cacheKey, dto, cancellationToken);
                 }
+            }
 
-                return results.Count > 0 ? results : null;
-            }
-            catch (HttpRequestException ex)
-            {
-                Log.LogError(ex, "Error fetching app details for app ids '{appIds}'", string.Join(",", appIds));
-                throw;
-            }
-            catch (OperationCanceledException ex)
-            {
-                Log.LogWarning(ex, "GetAppDetails request for app ids '{appIds}' was cancelled", string.Join(",", appIds));
-                throw;
-            }
-            catch (Exception ex)
-            {
-                Log.LogError(ex, "Unexpected error fetching app details for app id '{appIds}'", string.Join(",", appIds));
-                throw;
-            }
+            return results.Count > 0 ? results : null;
         }
 
         private string GetFormattedAppDetailsUrl(params int[] appIds)
         {
             return UrlFormatter.GetFormattedUrl(new GetAppDetailsUrl(appIds));
         }
+
+        private string GetCacheKey(int appId) => $"AppDetails_{appId}";
     }
 }

@@ -1,4 +1,5 @@
-﻿using SteamGameTracker.DataTransferObjects;
+﻿using SteamGameTracker.Components;
+using SteamGameTracker.DataTransferObjects;
 using SteamGameTracker.Models;
 using SteamGameTracker.Services.API.URLs;
 
@@ -13,22 +14,21 @@ namespace SteamGameTracker.Services.API
 
         public async Task<AppsModel?> GetApps(CancellationToken cancellationToken = default)
         {
+            var url = GetFormattedAppListUrl();
+            var appListResponstDTO = await GetDtoAsync<AppListResponseDTO>(url, cancellationToken);
+
+            if (appListResponstDTO is null)
+                return null;
+
             try
             {
-                var url = GetFormattedAppListUrl();
-                var appListResponstDTO = await GetDtoAsync<AppListResponseDTO>(url, cancellationToken);
-
-                return appListResponstDTO is not null ? new AppsModel(appListResponstDTO.AppList) : null;
+                var result = new AppsModel(appListResponstDTO.AppList);
+                return result;
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
-                Log.LogError(ex, "Error fetching app list");
-                throw;
-            }
-            catch (OperationCanceledException ex)
-            {
-                Log.LogWarning(ex, "GetRelevantApps request was cancelled");
-                throw;
+                Log.LogError(ex, "Error building apps model from API response");
+                return null;
             }
         }
 

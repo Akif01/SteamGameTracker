@@ -20,7 +20,7 @@ namespace SteamGameTracker.Services.API
         public async Task<NumberOfCurrentPlayersModel?> GetNumberOfCurrentPlayersAsync(int appId, 
             CancellationToken cancellationToken = default)
         {
-            string cacheKey = $"NumberOfCurrentPlayers_{appId}";
+            string cacheKey = GetCacheKey(appId);
             var cachedDto = await _cacheService.GetDtoAsync<NumberOfCurrentPlayersDTO>(cacheKey, cancellationToken);
 
             if (cachedDto is not null)
@@ -36,42 +36,27 @@ namespace SteamGameTracker.Services.API
                 }
             }
 
+            var url = GetFormattedPlayerCountUrl(appId);
+            var dto = await GetDtoAsync<NumberOfCurrentPlayersDTO>(url, cancellationToken);
+
+            if (dto is null)
+                return null;
+
             try
             {
-                var url = GetFormattedPlayerCountUrl(appId);
-                var dto = await GetDtoAsync<NumberOfCurrentPlayersDTO>(url, cancellationToken);
-                var result = dto is not null ? new NumberOfCurrentPlayersModel(dto) : null;
-
-                if (result is not null)
-                {
-                    await _cacheService.SetDtoAsync<NumberOfCurrentPlayersDTO>(cacheKey, dto, cancellationToken);
-                }
+                var result = new NumberOfCurrentPlayersModel(dto);
+                await _cacheService.SetDtoAsync<NumberOfCurrentPlayersDTO>(cacheKey, dto, cancellationToken);
 
                 return result;
             }
-            catch (HttpRequestException ex)
-            {
-                Log.LogError(ex, "Http error fetching player count for app id '{appId}'", appId);
-
-                if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    Log.LogError(ex, "App id {appId} was not found", appId);
-                    return null;
-                }
-
-                throw;
-            }
-            catch (OperationCanceledException ex)
-            {
-                Log.LogWarning(ex, "GetNumberOfCurrentPlayers request for app id '{appId}' was cancelled", appId);
-                throw;
-            }
             catch (Exception ex)
             {
-                Log.LogError(ex, "Unexpected error fetching number of current players for app id '{appId}'", appId);
-                throw;
+                Log.LogError(ex, "Error building player count model from API response for app id '{appId}'", appId);
+                return null;
             }
         }
+
+        private string GetCacheKey(int appId) => $"NumberOfCurrentPlayers_{appId}";
 
         private string GetFormattedPlayerCountUrl(int appId)
         {
