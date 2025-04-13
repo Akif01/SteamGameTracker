@@ -108,6 +108,10 @@ h1:focus {
     margin-right: 10px;
 }
 
+a.game-item {
+    text-decoration: none;
+}
+
 .game-info {
     display: flex;
     flex-direction: column;
@@ -150,10 +154,12 @@ h1:focus {
     display: flex;
     flex-direction: column;
     font-size: 14px;
+    color: white;
 }
 
 .game-player-count, .game-age-required, .game-type {
     font-weight: bold;
+    color: white;
 }
 
 .main-dark {
