@@ -18,6 +18,6 @@ namespace SteamGameTracker.Services.API.URLs
             };
         }
 
-        public override string ProvideUrlWithPlaceholders() => "https://store.steampowered.com/app/{appId}/Delta_Force/";
+        public override string ProvideUrlWithPlaceholders() => "https://store.steampowered.com/app/{appId}/";
     }
 }
