@@ -17,11 +17,11 @@ namespace SteamGameTracker.Services.API
             _cacheService = cacheService;
         }
 
-        public async Task<NumberOfCurrentPlayersModel?> GetNumberOfCurrentPlayersAsync(int appId, 
+        public async Task<NumberOfCurrentPlayersModel?> GetNumberOfCurrentPlayersAsync(int appId,
             CancellationToken cancellationToken = default)
         {
             string cacheKey = GetCacheKey(appId);
-            var cachedDto = await _cacheService.GetDtoAsync<NumberOfCurrentPlayersDTO>(cacheKey, cancellationToken);
+            var cachedDto = await _cacheService.GetDtoAsync<NumberOfCurrentPlayersDTO>(cacheKey, cancellationToken: cancellationToken);
 
             if (cachedDto is not null)
             {
@@ -36,8 +36,7 @@ namespace SteamGameTracker.Services.API
                 }
             }
 
-            var url = GetFormattedPlayerCountUrl(appId);
-            var dto = await GetDtoAsync<NumberOfCurrentPlayersDTO>(url, cancellationToken);
+            var dto = await StoreNumberOfCurrentPlayersInCache(appId, cancellationToken);
 
             if (dto is null)
                 return null;
@@ -45,7 +44,6 @@ namespace SteamGameTracker.Services.API
             try
             {
                 var result = new NumberOfCurrentPlayersModel(dto);
-                await _cacheService.SetDtoAsync<NumberOfCurrentPlayersDTO>(cacheKey, dto, cancellationToken);
 
                 return result;
             }
@@ -56,7 +54,30 @@ namespace SteamGameTracker.Services.API
             }
         }
 
-        private string GetCacheKey(int appId) => $"NumberOfCurrentPlayers_{appId}";
+        public async Task<NumberOfCurrentPlayersDTO?> StoreNumberOfCurrentPlayersInCache(int appId,
+            CancellationToken cancellationToken = default)
+        {
+            var url = GetFormattedPlayerCountUrl(appId);
+
+            try
+            {
+                var dto = await GetDtoAsync<NumberOfCurrentPlayersDTO>(url, cancellationToken);
+
+                if (dto is null)
+                    return null;
+
+                await _cacheService.SetDtoAsync<NumberOfCurrentPlayersDTO>(GetCacheKey(appId), dto, cancellationToken);
+
+                return dto;
+            }
+            catch (Exception ex)
+            {
+                Log.LogError(ex, "Error storing number of current players for app id '{appId}'", appId);
+                return null;
+            }
+        }
+
+        public string GetCacheKey(int appId) => $"NumberOfCurrentPlayers_{appId}";
 
         private string GetFormattedPlayerCountUrl(int appId)
         {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using SteamGameTracker.Components;
 using System.Text.Json;
 
@@ -21,8 +22,8 @@ namespace SteamGameTracker.Services
         }
 
         public async Task<TDto?> GetDtoAsync<TDto>(string cacheKey,
-            CancellationToken cancellationToken = default,
-            bool removeCorruptedEntryOnException = true) 
+            bool removeCorruptedEntryOnException = true, 
+            CancellationToken cancellationToken = default) 
             where TDto : class
         {
             var cachedData = await GetStringAsync(cacheKey, cancellationToken);
@@ -73,12 +74,19 @@ namespace SteamGameTracker.Services
         {
             // Serialize and store in Redis
             string serializedData = JsonSerializer.Serialize(dto);
-            await _distributedCache.SetStringAsync(cacheKey, serializedData, GetDefaultCacheEntryOptions(), cancellationToken);
+            var options = GetDefaultCacheEntryOptions();
+            await _distributedCache.SetStringAsync(cacheKey, serializedData, options, cancellationToken);
 
-            _logger. LogInformation("{SetDtoAsync} - Stored cache key '{cacheKey}' with data '{serializedData}'", 
+            // Also store the current UTC timestamp as metadata
+            string timestampKey = GetTimestampCacheKey(cacheKey);
+            string timestampValue = DateTime.UtcNow.ToString("o"); // ISO 8601 format
+            await _distributedCache.SetStringAsync(timestampKey, timestampValue, options, cancellationToken);
+
+            _logger. LogInformation("{SetDtoAsync} - Stored cache key '{cacheKey}' with data '{serializedData}' and timestamp '{timestampValue}'", 
                 nameof(SetDtoAsync), 
                 cacheKey, 
-                serializedData);
+                serializedData, 
+                timestampValue);
         }
 
         public async Task RemoveAsync(string cacheKey,
@@ -89,6 +97,23 @@ namespace SteamGameTracker.Services
                 nameof(RemoveAsync),
                 cacheKey);
         }
+
+        public async Task<DateTime?> GetLastUpdateTimeAsync(string cacheKey, CancellationToken cancellationToken)
+        {
+            var timestampCacheKey = GetTimestampCacheKey(cacheKey);
+
+            var timestampStr = await _distributedCache.GetStringAsync(timestampCacheKey, cancellationToken);
+
+            if (!string.IsNullOrEmpty(timestampStr) &&
+                DateTime.TryParse(timestampStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out var parsedDate))
+            {
+                return parsedDate;
+            }
+
+            return null;
+        }
+
+        private string GetTimestampCacheKey(string cacheKey) => $"{cacheKey}_Timestamp";
 
         private static DistributedCacheEntryOptions GetDefaultCacheEntryOptions() => new DistributedCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromHours(1));

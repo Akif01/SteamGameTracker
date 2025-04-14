@@ -19,8 +19,7 @@ namespace SteamGameTracker.Models
 
         public override bool IsValid()
         {
-            return Id > 0 &&
-                !string.IsNullOrEmpty(Name);
+            return Id > 0;
         }
     }
 }

@@ -1,9 +1,6 @@
 ﻿using System.Text;
-using Microsoft.Extensions.Logging;
-using SteamGameTracker.Services.API;
-using SteamGameTracker.Services.API.URLs;
 
-namespace SteamGameTracker.Utils
+namespace SteamGameTracker.Services.API.URLs
 {
     public class UrlFormatter : IUrlFormatter
     {
@@ -21,15 +18,11 @@ namespace SteamGameTracker.Utils
 
             if (placeholderValueDict.Count == 0)
             {
-                _logger.LogInformation($"URL '{rawUrl}' was not formatted, since no placeholders were provided.");
+                _logger.LogInformation("URL '{RawURL}' was not formatted, since no placeholders were provided.", rawUrl);
                 return rawUrl;
             }
 
             var formattedUrlBuilder = new StringBuilder(rawUrl);
-
-            _logger.LogInformation($"Formatting of URL '{rawUrl}' has started.\n" +
-                $"Placeholders: '{string.Join(",", placeholderValueDict.Keys)}'.\n" +
-                $"Values: '{string.Join(",", placeholderValueDict.Values)}'");
 
             foreach (var kvp in placeholderValueDict)
             {
@@ -38,7 +31,7 @@ namespace SteamGameTracker.Utils
             }
 
             string formattedUrl = formattedUrlBuilder.ToString();
-            _logger.LogInformation($"Formatted URL of '{rawUrl}' is '{formattedUrl}'.");
+            _logger.LogInformation("Formatted URL of '{RawURL}' is '{FormattedUrl}'.", rawUrl, formattedUrl);
 
             return formattedUrl;
         }

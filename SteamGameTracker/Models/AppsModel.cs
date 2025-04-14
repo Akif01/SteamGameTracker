@@ -4,7 +4,7 @@ namespace SteamGameTracker.Models
 {
     public class AppsModel : ModelBase<AppsDTO>
     {
-        public List<AppModel> Apps { get; private set; } = new();
+        public List<AppModel> Apps { get; private set; } = [];
 
         public AppsModel(AppsDTO dto) : base(dto)
         {
@@ -15,6 +15,7 @@ namespace SteamGameTracker.Models
             foreach (var app in dto.Apps) 
             {
                 var appModel = new AppModel(app);
+                Apps.Add(appModel);
             }
         }
 
