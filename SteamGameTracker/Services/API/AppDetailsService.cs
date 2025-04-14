@@ -23,7 +23,7 @@ namespace SteamGameTracker.Services.API
         {
             string cacheKey = $"AppDetails_{appId}";
 
-            var cachedDto = await _cacheService.GetDtoAsync<SuccessDTO>(cacheKey, cancellationToken);
+            var cachedDto = await _cacheService.GetDtoAsync<SuccessDTO>(cacheKey, cancellationToken: cancellationToken);
 
             if (cachedDto is not null)
             {
@@ -69,7 +69,7 @@ namespace SteamGameTracker.Services.API
             foreach (var appId in appIds)
             {
                 string cacheKey = GetCacheKey(appId);
-                var cachedDto = await _cacheService.GetDtoAsync<SuccessDTO>(cacheKey, cancellationToken);
+                var cachedDto = await _cacheService.GetDtoAsync<SuccessDTO>(cacheKey, cancellationToken: cancellationToken);
 
                 if (cachedDto is not null)
                 {

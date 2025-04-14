@@ -22,7 +22,7 @@ namespace SteamGameTracker.Services.API
         {
             string cacheKey = "FeaturedApps";
 
-            var cachedDto = await _cacheService.GetDtoAsync<FeaturedAppsDTO>(cacheKey, cancellationToken);
+            var cachedDto = await _cacheService.GetDtoAsync<FeaturedAppsDTO>(cacheKey, cancellationToken: cancellationToken);
 
             if (cachedDto is not null)
             {
