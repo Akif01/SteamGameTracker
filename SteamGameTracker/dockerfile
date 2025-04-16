@@ -1,31 +1,24 @@
-# Base image for building
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy csproj files and restore dependencies
-COPY ["SteamGameTracker.csproj", "./"]
+# Copy project file and restore dependencies
+COPY *.csproj .
 RUN dotnet restore
 
-# Copy the rest of the code
+# Copy everything else and build
 COPY . .
-
-# Publish the application
 RUN dotnet publish -c Release -o /app/publish
 
-# Runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 
-# Copy the published files from the build stage
+# Copy published output from build stage
 COPY --from=build /app/publish .
 
-# Expose port 80 and 443
-EXPOSE 80
-EXPOSE 443
+# Expose port and set env
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 
-# Set environment variables
-ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ASPNETCORE_URLS=http://+:80
-
-# Start the application
 ENTRYPOINT ["dotnet", "SteamGameTracker.dll"]

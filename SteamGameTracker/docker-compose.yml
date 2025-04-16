@@ -19,9 +19,6 @@ services:
       context: .
       dockerfile: dockerfile
     container_name: steamgametracker
-    ports:
-      - "80:80"
-      - "443:443"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__Redis=redis:6379
@@ -30,6 +27,19 @@ services:
     restart: unless-stopped
     networks:
       - steamtracker-network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-reverse-proxy
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - blazor-app
+    networks:
+      - steamtracker-network
+    restart: unless-stopped
 
 # Redis Commander - Optional UI for Redis management
   redis-commander:
