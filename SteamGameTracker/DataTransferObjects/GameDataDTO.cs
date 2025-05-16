@@ -7,10 +7,10 @@ namespace SteamGameTracker.DataTransferObjects
     public class GameDataDTO
     {
         [JsonPropertyName("type")]
-        public string Type { get; set; }
+        public string? Type { get; set; }
 
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonPropertyName("steam_appid")]
         public int SteamAppId { get; set; }
@@ -22,28 +22,28 @@ namespace SteamGameTracker.DataTransferObjects
         public bool IsFree { get; set; }
 
         [JsonPropertyName("detailed_description")]
-        public string DetailedDescription { get; set; }
+        public string? DetailedDescription { get; set; }
 
         [JsonPropertyName("about_the_game")]
-        public string AboutTheGame { get; set; }
+        public string? AboutTheGame { get; set; }
 
         [JsonPropertyName("short_description")]
-        public string ShortDescription { get; set; }
+        public string? ShortDescription { get; set; }
 
         [JsonPropertyName("supported_languages")]
-        public string SupportedLanguages { get; set; }
+        public string? SupportedLanguages { get; set; }
 
         [JsonPropertyName("header_image")]
-        public string HeaderImage { get; set; }
+        public string? HeaderImage { get; set; }
 
         [JsonPropertyName("capsule_image")]
-        public string CapsuleImage { get; set; }
+        public string? CapsuleImage { get; set; }
 
         [JsonPropertyName("capsule_imagev5")]
-        public string CapsuleImageV5 { get; set; }
+        public string? CapsuleImageV5 { get; set; }
 
         [JsonPropertyName("website")]
-        public string Website { get; set; }
+        public string? Website { get; set; }
 
         [JsonPropertyName("pc_requirements")]
         [JsonConverter(typeof(SystemRequirementsConverter))]
@@ -97,15 +97,15 @@ namespace SteamGameTracker.DataTransferObjects
         public SupportInfoDTO SupportInfo { get; set; }
 
         [JsonPropertyName("background")]
-        public string Background { get; set; }
+        public string? Background { get; set; }
 
         [JsonPropertyName("background_raw")]
-        public string BackgroundRaw { get; set; }
+        public string? BackgroundRaw { get; set; }
 
         [JsonPropertyName("content_descriptors")]
-        public ContentDescriptorsDTO ContentDescriptors { get; set; }
+        public ContentDescriptorsDTO? ContentDescriptors { get; set; }
 
         [JsonPropertyName("ratings")]
-        public RatingsDTO Ratings { get; set; }
+        public RatingsDTO? Ratings { get; set; }
     }
 }

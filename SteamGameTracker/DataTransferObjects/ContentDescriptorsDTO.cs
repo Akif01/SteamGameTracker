@@ -5,9 +5,9 @@ namespace SteamGameTracker.DataTransferObjects
     public class ContentDescriptorsDTO
     {
         [JsonPropertyName("ids")]
-        public List<int> Ids { get; set; }
+        public List<int> Ids { get; set; } = [];
 
         [JsonPropertyName("notes")]
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
     }
 }

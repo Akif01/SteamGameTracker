@@ -5,6 +5,6 @@ namespace SteamGameTracker.DataTransferObjects
     public class AppListResponseDTO
     {
         [JsonPropertyName("applist")]
-        public AppsDTO AppList { get; set; }
+        public AppsDTO AppList { get; set; } = new();
     }
 }

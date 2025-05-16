@@ -8,6 +8,6 @@ namespace SteamGameTracker.DataTransferObjects
         public int AppId { get; set; }
 
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
     }
 }

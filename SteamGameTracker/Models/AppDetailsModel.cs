@@ -25,7 +25,7 @@ namespace SteamGameTracker.Models
             Name = dto.Data.Name;
             RequiredAge = dto.Data.RequiredAge;
             ShortDescription = dto.Data.ShortDescription;
-            Genres = dto.Data.Genres.Select(x => x.Description).ToList();
+            Genres = dto.Data.Genres?.Select(x => x.Description).ToList() ?? new List<string>();
             Type = dto.Data.Type;
         }
 
