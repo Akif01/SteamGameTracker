@@ -17,7 +17,7 @@ namespace SteamGameTracker.Services.API
             UrlFormatter = urlFormatter ?? throw new ArgumentNullException(nameof(urlFormatter));
         }
 
-        public async Task<TDto?> GetDtoAsync<TDto>(
+        protected virtual async Task<TDto?> GetDtoAsync<TDto>(
             string url,
             CancellationToken cancellationToken = default)
             where TDto : class

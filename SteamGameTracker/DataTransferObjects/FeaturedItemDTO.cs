@@ -11,7 +11,7 @@ namespace SteamGameTracker.DataTransferObjects
         public int Type { get; set; }
 
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonPropertyName("discounted")]
         public bool Discounted { get; set; }
@@ -26,13 +26,13 @@ namespace SteamGameTracker.DataTransferObjects
         public int FinalPrice { get; set; }
 
         [JsonPropertyName("currency")]
-        public string Currency { get; set; }
+        public string? Currency { get; set; }
 
         [JsonPropertyName("large_capsule_image")]
-        public string LargeCapsuleImage { get; set; }
+        public string? LargeCapsuleImage { get; set; }
 
         [JsonPropertyName("small_capsule_image")]
-        public string SmallCapsuleImage { get; set; }
+        public string? SmallCapsuleImage { get; set; }
 
         [JsonPropertyName("windows_available")]
         public bool WindowsAvailable { get; set; }
@@ -50,9 +50,9 @@ namespace SteamGameTracker.DataTransferObjects
         public long? DiscountExpiration { get; set; }
 
         [JsonPropertyName("header_image")]
-        public string HeaderImage { get; set; }
+        public string? HeaderImage { get; set; }
 
         [JsonPropertyName("controller_support")]
-        public string ControllerSupport { get; set; }
+        public string? ControllerSupport { get; set; }
     }
 }
