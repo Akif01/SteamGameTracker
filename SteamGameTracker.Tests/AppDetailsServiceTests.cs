@@ -8,6 +8,7 @@ using SteamGameTracker.Services.API.URLs;
 using SteamGameTracker.Services;
 using SteamGameTracker.Components;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace SteamGameTracker.Tests
 {
@@ -104,6 +105,95 @@ namespace SteamGameTracker.Tests
             Assert.AreEqual("Test Game", list[0].Name);
             Assert.AreEqual("Game 456", list[1].Name);
         }
+
+        [TestMethod]
+        public async Task GetAppDetailsAsync_CacheReturnsInvalidDTO_RemovesCacheAndContinues()
+        {
+            int appId = 123;
+            string cacheKey = $"AppDetails_{appId}";
+
+            // Setup cache to return corrupted DTO (e.g. missing required fields)
+            var corruptedDto = new SuccessDTO
+            {
+                Data = null // or partial invalid data
+            };
+
+            _cacheServiceMock
+                .Setup(x => x.GetDtoAsync<SuccessDTO>(cacheKey, It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(corruptedDto);
+
+            _cacheServiceMock
+                .Setup(x => x.RemoveAsync(cacheKey, It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask)
+                .Verifiable();
+
+            // Setup API fetch to return valid DTO
+            var validDto = new SuccessDTO
+            {
+                Data = new GameDataDTO { SteamAppId = appId, Name = "Recovered Game", Type = "game" }
+            };
+            var apiDto = new AppDetailsDTO { [appId] = validDto };
+
+            _urlFormatterMock
+                .Setup(x => x.GetFormattedUrl(It.IsAny<GetAppDetailsUrl>()))
+                .Returns("https://test");
+
+            var service = CreateService(apiDto);
+
+            var result = await service.GetAppDetailsAsync(appId);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("Recovered Game", result.Name);
+
+            _cacheServiceMock.Verify(x => x.RemoveAsync(cacheKey, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetAppDetailsAsync_ApiReturnsNull_ReturnsNull()
+        {
+            int appId = 789;
+            string cacheKey = $"AppDetails_{appId}";
+
+            // Cache miss
+            _cacheServiceMock
+                .Setup(x => x.GetDtoAsync<SuccessDTO>(cacheKey, It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((SuccessDTO?)null);
+
+            // API returns null
+            var service = CreateService(dto: null);
+
+            var result = await service.GetAppDetailsAsync(appId);
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public async Task GetAppDetailsAsync_EmptyAppIds_ReturnsNull()
+        {
+            var service = CreateService();
+
+            var result = await service.GetAppDetailsAsync(Array.Empty<int>());
+
+            Assert.IsTrue(result.Count() == 0);
+        }
+
+        [TestMethod]
+        public async Task GetAppDetailsAsync_InvalidDtoData_ReturnsNull()
+        {
+            var invalidSuccessDto = new SuccessDTO
+            {
+                Data = new GameDataDTO()
+            };
+            var invalidAppDetailsDto = new AppDetailsDTO
+            {
+                { 0, invalidSuccessDto }
+            };
+            var service = CreateService(invalidAppDetailsDto);
+
+            var model = await service.GetAppDetailsAsync(0);
+            Assert.IsNull(model);
+        }
+
 
         private AppDetailsDTO CreateFakeAppDetailsDto(params (int appId, string name)[] entries)
         {
