@@ -10,10 +10,7 @@
     <div class="game-info">
         <h3>@ViewModel.Name</h3>
         <p>@string.Join(", ", ViewModel.Genres)</p>
-        @{
-            var outputCurrencyString = ViewModel.Currency + " " + (ViewModel.PriceInCents / 100.0).ToString("0.00");
-        }
-        <span class="price">@outputCurrencyString</span>
+        <span class="price">@GetFormattedPrice(ViewModel.PriceInCents, ViewModel.Currency)</span>
     </div>
     <div class="game-addional-info">
         <div>
@@ -39,5 +36,10 @@
         _gameSteamPageUrl = UrlFormatter.GetFormattedUrl(url);
 
         base.OnInitialized();
+    }
+
+    private string GetFormattedPrice(double priceInCents, string currency)
+    {
+        return priceInCents == 0 ? "FREE" : $"{currency} {priceInCents / 100.0:0.00}";
     }
 }
