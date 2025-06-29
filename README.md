@@ -10,10 +10,13 @@ Steam Game Tracker is a Blazor application designed to track and display feature
 - 🚀 Blazor UI with component-based structure
 - ⚡ Redis-like **distributed caching** to minimize API calls
 - 🔧 Modular and testable service-based architecture
+- ⚙️ NGINX reverse proxy
+- 🐳 Docker-ready
 
 ---
 
 ## 🧪 Running the Project with 🐳 Docker
+
 ### Prerequisites
 - [Docker](https://docs.docker.com/get-docker/)
 
